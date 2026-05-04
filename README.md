@@ -143,28 +143,6 @@ The app will open at `http://localhost:3000`.
 
 ---
 
-## 🧪 Test Credentials
-
-### Admin / Employee
-
-| Field | Value |
-|-------|-------|
-| Account Number | `000000000000` |
-| Password | `Admin@1234` |
-| Role | Admin |
-
-### Demo Customer
-
-| Field | Value |
-|-------|-------|
-| Account Number | `123456789012` |
-| Password | `Admin@1234` |
-| Role | Customer |
-
-> You can also register a new customer account via the Register page.
-
----
-
 ## 🔌 API Endpoints
 
 ### Authentication
@@ -216,26 +194,6 @@ The app will open at `http://localhost:3000`.
 | DDoS / Brute Force | `AspNetCoreRateLimit` (10 login attempts/min, 5 registers/min) |
 | MIME Sniffing | `X-Content-Type-Options: nosniff` |
 | Information Leakage | Generic error messages on auth failures |
-
----
-
-## 🚀 Running Both Servers
-
-Open two terminals:
-
-**Terminal 1 – Backend:**
-```bash
-cd secure-payments-portal/backend
-dotnet run
-```
-
-**Terminal 2 – Frontend:**
-```bash
-cd secure-payments-portal/frontend
-npm install && npm start
-```
-
-Visit [http://localhost:3000](http://localhost:3000)
 
 ---
 
