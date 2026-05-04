@@ -115,3 +115,13 @@ secure-payments-portal/
 | Information Leakage | Generic error messages on auth failures |
 
 ---
+
+### List of Tools Used
+- MySql
+- React
+- OBS Studio
+- Visual Studio
+- ChatGPT for help with the presentation
+- Github Copilot
+
+---
