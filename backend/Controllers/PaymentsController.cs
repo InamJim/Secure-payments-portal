@@ -24,7 +24,7 @@ namespace SecurePaymentsPortal.Controllers
             _logger = logger;
         }
 
-        // ── POST /api/payments/pay  (Customer only) ─────────────
+        // POST /api/payments/pay (Customer only)
         [HttpPost("pay")]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDto dto)
@@ -42,7 +42,7 @@ namespace SecurePaymentsPortal.Controllers
             if (!InputValidationService.IsValidSwiftCode(dto.SwiftCode))
                 return BadRequest(new { message = "SWIFT code must be 8 or 11 uppercase alphanumeric characters." });
 
-            if (!InputValidationService.IsValidAccountNumber(dto.Receiver))
+            if (!InputValidationService.IsValidAccountNumber(dto.RecipientAccount))
                 return BadRequest(new { message = "Recipient account number must be 8–12 digits." });
 
             // Extract user ID from JWT claims
@@ -56,7 +56,7 @@ namespace SecurePaymentsPortal.Controllers
                 Amount    = dto.Amount,
                 Currency  = dto.Currency.Trim().ToUpperInvariant(),
                 SwiftCode = dto.SwiftCode.Trim().ToUpperInvariant(),
-                Receiver  = dto.Receiver.Trim(),
+                RecipientAccount  = dto.RecipientAccount.Trim(),
                 Status    = "PENDING"
             };
 
@@ -70,7 +70,7 @@ namespace SecurePaymentsPortal.Controllers
             return Ok(new { message = "Payment submitted successfully.", paymentId = payment.Id });
         }
 
-        // ── GET /api/payments/all  (Admin only) ─────────────────
+        // GET /api/payments/all (Admin only)
         [HttpGet("all")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllPayments()
@@ -86,7 +86,7 @@ namespace SecurePaymentsPortal.Controllers
                     Amount        = p.Amount,
                     Currency      = p.Currency,
                     SwiftCode     = p.SwiftCode,
-                    Receiver      = p.Receiver,
+                    RecipientAccount = p.RecipientAccount,
                     Status        = p.Status,
                     CreatedAt     = p.CreatedAt,
                     VerifiedAt    = p.VerifiedAt
@@ -96,7 +96,7 @@ namespace SecurePaymentsPortal.Controllers
             return Ok(payments);
         }
 
-        // ── POST /api/payments/verify/{id}  (Admin only) ────────
+        // POST /api/payments/verify/{id} (Admin only)
         [HttpPost("verify/{id:int}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> VerifyPayment(int id)
@@ -122,7 +122,7 @@ namespace SecurePaymentsPortal.Controllers
             return Ok(new { message = "Payment verified and submitted to SWIFT.", paymentId = id });
         }
 
-        // ── GET /api/payments/my  (Customer – own payments) ─────
+        // GET /api/payments/my  (Customer – own payments)
         [HttpGet("my")]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetMyPayments()
@@ -142,7 +142,7 @@ namespace SecurePaymentsPortal.Controllers
                     Amount        = p.Amount,
                     Currency      = p.Currency,
                     SwiftCode     = p.SwiftCode,
-                    Receiver      = p.Receiver,
+                    RecipientAccount = p.RecipientAccount,
                     Status        = p.Status,
                     CreatedAt     = p.CreatedAt,
                     VerifiedAt    = p.VerifiedAt

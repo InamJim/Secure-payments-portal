@@ -99,7 +99,7 @@ const Login = () => {
                 </div>
               </div>
 
-              {/* Password */}
+              {/* Password Section*/}
               <div className="mb-4">
                 <label className="form-label text-light fw-medium small">Password</label>
                 <div className="input-group">
@@ -131,26 +131,7 @@ const Login = () => {
               </button>
             </form>
 
-            {/* Demo Credentials */}
-            <div className="mt-4 p-3 rounded-3" style={{ background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(100,180,255,0.12)' }}>
-              <p className="text-secondary small mb-2 fw-semibold"><i className="bi bi-info-circle me-1"></i>Demo Credentials</p>
-              <div className="row g-2">
-                <div className="col-6">
-                  <div className="p-2 rounded-2" style={{ background: 'rgba(10,22,40,0.5)' }}>
-                    <p className="text-info mb-1" style={{ fontSize: '0.7rem', fontWeight: 600 }}>CUSTOMER</p>
-                    <p className="text-light mb-0" style={{ fontSize: '0.75rem' }}>Acc: 123456789012</p>
-                    <p className="text-light mb-0" style={{ fontSize: '0.75rem' }}>Pwd: Admin@1234</p>
-                  </div>
-                </div>
-                <div className="col-6">
-                  <div className="p-2 rounded-2" style={{ background: 'rgba(10,22,40,0.5)' }}>
-                    <p className="text-warning mb-1" style={{ fontSize: '0.7rem', fontWeight: 600 }}>ADMIN</p>
-                    <p className="text-light mb-0" style={{ fontSize: '0.75rem' }}>Acc: 000000000000</p>
-                    <p className="text-light mb-0" style={{ fontSize: '0.75rem' }}>Pwd: Admin@1234</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            
           </div>
         </div>
 

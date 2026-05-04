@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SecurePaymentsPortal.Models
 {
-    // ── Auth DTOs ──────────────────────────────────────────────
+    // Auth DTOs 
     public class RegisterDto
     {
         [Required]
@@ -35,7 +35,7 @@ namespace SecurePaymentsPortal.Models
         public string AccountNumber { get; set; } = string.Empty;
     }
 
-    // ── Payment DTOs ───────────────────────────────────────────
+    // Payment DTOs 
     public class CreatePaymentDto
     {
         [Required]
@@ -48,7 +48,7 @@ namespace SecurePaymentsPortal.Models
         public string SwiftCode { get; set; } = string.Empty;
 
         [Required]
-        public string Receiver { get; set; } = string.Empty;
+        public string RecipientAccount { get; set; } = string.Empty;
     }
 
     public class PaymentResponseDto
@@ -59,7 +59,7 @@ namespace SecurePaymentsPortal.Models
         public decimal Amount { get; set; }
         public string Currency { get; set; } = string.Empty;
         public string SwiftCode { get; set; } = string.Empty;
-        public string Receiver { get; set; } = string.Empty;
+        public string RecipientAccount { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime? VerifiedAt { get; set; }

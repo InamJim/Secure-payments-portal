@@ -29,9 +29,9 @@ namespace SecurePaymentsPortal.Models
         public string SwiftCode { get; set; } = string.Empty;
 
         [Required]
-        [Column("Receiver")]
-        [MaxLength(20)]
-        public string Receiver { get; set; } = string.Empty;
+        [Column("RecipientAccount")]
+        [MaxLength(12)]
+        public string RecipientAccount { get; set; } = string.Empty;
 
         [Column("Status")]
         [MaxLength(20)]
@@ -43,7 +43,6 @@ namespace SecurePaymentsPortal.Models
         [Column("VerifiedAt")]
         public DateTime? VerifiedAt { get; set; }
 
-        // Navigation property
         [ForeignKey("UserId")]
         public User? User { get; set; }
     }

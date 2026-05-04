@@ -26,7 +26,7 @@ const statusBadge = (status) => {
 const PaymentPage = () => {
   const { user } = useAuth();
 
-  const [form, setForm]         = useState({ amount: '', currency: 'USD', swiftCode: '', receiver: '' });
+  const [form, setForm]         = useState({ amount: '', currency: 'USD', swiftCode: '', RecipientAccount: '' });
   const [errors, setErrors]     = useState({});
   const [loading, setLoading]   = useState(false);
   const [alert, setAlert]       = useState(null);
@@ -52,8 +52,8 @@ const PaymentPage = () => {
       e.currency = 'Select a currency.';
     if (!SWIFT_RE.test(form.swiftCode.trim().toUpperCase()))
       e.swiftCode = 'SWIFT code must be 8 or 11 uppercase alphanumeric characters.';
-    if (!ACCOUNT_RE.test(form.receiver.trim()))
-      e.receiver = 'Recipient account must be 8–12 digits.';
+    if (!ACCOUNT_RE.test(form.RecipientAccount.trim()))
+      e.RecipientAccount = 'Recipient account must be 8–12 digits.';
     return e;
   };
 
@@ -75,10 +75,10 @@ const PaymentPage = () => {
         amount:    parseFloat(form.amount),
         currency:  form.currency,
         swiftCode: form.swiftCode.trim().toUpperCase(),
-        receiver:  form.receiver.trim(),
+        RecipientAccount:  form.RecipientAccount.trim(),
       });
       setAlert({ type: 'success', message: 'Payment submitted successfully! Your payment is pending employee verification.' });
-      setForm({ amount: '', currency: 'USD', swiftCode: '', receiver: '' });
+      setForm({ amount: '', currency: 'USD', swiftCode: '', RecipientAccount: '' });
       fetchMyPayments();
     } catch (err) {
       const msg = err.response?.data?.message || 'Payment submission failed.';
@@ -137,7 +137,7 @@ const PaymentPage = () => {
                 )}
 
                 <form onSubmit={handleSubmit} noValidate>
-                  {/* Amount + Currency */}
+                  {/* Amount and Currency */}
                   <div className="mb-3">
                     <label className="form-label text-light fw-medium small">Amount &amp; Currency</label>
                     <div className="input-group">
@@ -183,10 +183,10 @@ const PaymentPage = () => {
                       <span className="input-group-text" style={{ background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(100,180,255,0.2)', color: '#60a5fa' }}>
                         <i className="bi bi-person-badge"></i>
                       </span>
-                      <input type="text" name="receiver"
+                      <input type="text" name="RecipientAccount"
                         className={`form-control ${errors.receiver ? 'is-invalid' : ''}`}
                         placeholder="Recipient's account number"
-                        value={form.receiver} onChange={handleChange} maxLength={12}
+                        value={form.RecipientAccount} onChange={handleChange} maxLength={12}
                         style={{ background: 'rgba(10,22,40,0.8)', border: '1px solid rgba(100,180,255,0.2)', color: '#e2e8f0' }} />
                       {errors.receiver && <div className="invalid-feedback">{errors.receiver}</div>}
                     </div>

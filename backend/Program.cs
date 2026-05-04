@@ -10,13 +10,13 @@ using SecurePaymentsPortal.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 
-// ── Services ─────────────────────────────────────────────────
+// Services 
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Database (MySQL via Pomelo – parameterized queries via EF Core)
+// Database (MySQL)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
@@ -33,7 +33,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false; // Set true in production
+    options.RequireHttpsMetadata = false; 
     options.SaveToken            = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -44,7 +44,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer              = jwtIssuer,
         ValidAudience            = jwtAudience,
         IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-        ClockSkew                = TimeSpan.Zero  // No tolerance for expired tokens
+        ClockSkew                = TimeSpan.Zero  
     };
 });
 
@@ -60,7 +60,7 @@ builder.Configuration.GetSection("IpRateLimiting"));
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
-// CORS – allow React dev server
+// CORS 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactApp", policy =>
@@ -71,46 +71,45 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ── Build app ────────────────────────────────────────────────
+// Build app 
 var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// ── Middleware pipeline (ORDER MATTERS) ──────────────────────
+// Middleware pipeline
 
-// HSTS should be first security transport rule
 if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
 }
 
-// Then enforce HTTPS redirection
+// Enforce HTTPS redirection
 app.UseHttpsRedirection();
 
-// 1. Security headers (Clickjacking, XSS, HSTS, CSP)
+// Security headers (Clickjacking, XSS, HSTS, CSP)
 app.UseSecurityHeaders();
 
-// 2. HTTPS redirection (MitM protection)
+// HTTPS redirection (MitM protection)
 app.UseHttpsRedirection();
 
-// 3. Rate limiting (DDoS protection)
+// Rate limiting (DDoS protection)
 app.UseIpRateLimiting();
 
-// 4. CORS
+// CORS
 app.UseCors("ReactApp");
 
-// 5. Routing
+// Routing
 app.UseRouting();
 
-// 6. Authentication & Authorisation
+// Authentication & Authorisation
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 7. Controllers
+// Controllers
 app.MapControllers();
 
-// ── Apply pending EF migrations on startup (optional) ────────
+// Apply pending EF migrations on startup (optional) 
 // Comment out if you prefer to run the SQL script manually.
 using (var scope = app.Services.CreateScope())
 {

@@ -20,7 +20,7 @@ namespace SecurePaymentsPortal.Services
         private static readonly Regex AccountNumberRegex =
             new(@"^\d{8,12}$", RegexOptions.Compiled);
 
-        // Positive decimal with up to 2 decimal places (max 15 digits before dp)
+        // Positive decimal with up to 2 decimal places
         private static readonly Regex AmountRegex =
             new(@"^\d{1,15}(\.\d{1,2})?$", RegexOptions.Compiled);
 

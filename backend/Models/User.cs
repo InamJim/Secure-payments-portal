@@ -41,7 +41,7 @@ namespace SecurePaymentsPortal.Models
         // Navigation property
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
-        // ── SECURITY ADDITIONS (LOCKOUT SYSTEM) ──
+        // SECURITY ADDITIONS (LOCKOUT SYSTEM)
 
         [Column("FailedLoginAttempts")]
         public int FailedLoginAttempts { get; set; } = 0;

@@ -24,7 +24,7 @@ namespace SecurePaymentsPortal.Controllers
             _logger = logger;
         }
 
-        // ── POST /api/auth/register ──────────────────────────────
+        // POST /api/auth/register 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
@@ -44,7 +44,7 @@ namespace SecurePaymentsPortal.Controllers
             if (!InputValidationService.IsValidPassword(dto.Password))
                 return BadRequest(new { message = "Password must be 8–128 characters and include uppercase, lowercase, digit, and special character." });
 
-            // Check for duplicate account number (EF parameterized query – SQL injection safe)
+            // Check for duplicate account number 
             bool accountExists = await _db.Users
                 .AnyAsync(u => u.AccountNumber == dto.AccountNumber.Trim());
             if (accountExists)
@@ -56,7 +56,7 @@ namespace SecurePaymentsPortal.Controllers
             if (idExists)
                 return Conflict(new { message = "An account with this ID number already exists." });
 
-            // Hash password with bcrypt (work factor 12)
+            // Hash password with bcrypt
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, workFactor: 12);
 
             var user = new User
@@ -76,7 +76,7 @@ namespace SecurePaymentsPortal.Controllers
             return Ok(new { message = "Registration successful. You can now log in." });
         }
 
-        // ── POST /api/auth/login ─────────────────────────────────
+        // POST /api/auth/login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
@@ -86,12 +86,11 @@ namespace SecurePaymentsPortal.Controllers
             if (!InputValidationService.IsValidAccountNumber(dto.AccountNumber))
                 return Unauthorized(new { message = "Invalid credentials." });
 
-            // Retrieve user (parameterized via EF Core – SQL injection safe)
+            // Retrieve user 
             var user = await _db.Users
                 .FirstOrDefaultAsync(u => u.AccountNumber == dto.AccountNumber.Trim());
 
-            // Constant-time comparison: always verify hash even if user not found
-            // to prevent timing-based user enumeration
+            
             string dummyHash = "$2a$12$invaliddummyhashvaluetopreventienumeeration00000000000";
             bool passwordValid = BCrypt.Net.BCrypt.Verify(
                 dto.Password,
