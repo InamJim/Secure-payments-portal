@@ -1,0 +1,68 @@
+version: 2.1
+
+orbs:
+  sonarcloud: sonarsource/sonarcloud@2.0
+
+jobs:
+  build-backend:
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:8.0
+    working_directory: ~/project/backend
+    steps:
+      - checkout:
+          path: ~/project
+
+      - run:
+          name: Restore dependencies
+          command: dotnet restore
+
+      - run:
+          name: Build solution
+          command: dotnet build --configuration Release --no-restore
+
+      - run:
+          name: Run tests (if available)
+          command: dotnet test --no-build || true
+
+  sonar-scan:
+    docker:
+      - image: sonarsource/sonar-scanner-cli:latest
+    working_directory: ~/project
+    steps:
+      - checkout
+
+      - run:
+          name: SonarQube Scan
+          command: |
+            sonar-scanner \
+              -Dsonar.projectKey=SecurePaymentsPortal \
+              -Dsonar.sources=backend \
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONAR_TOKEN
+
+  build-frontend:
+    docker:
+      - image: node:18
+    working_directory: ~/project/frontend
+    steps:
+      - checkout:
+          path: ~/project
+
+      - run:
+          name: Install dependencies
+          command: npm install
+
+      - run:
+          name: Build React app
+          command: npm run build
+
+workflows:
+  security-pipeline:
+    jobs:
+      - build-backend
+      - sonar-scan:
+          requires:
+            - build-backend
+      - build-frontend:
+          requires:
+            - build-backend

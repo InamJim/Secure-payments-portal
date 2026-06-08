@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+/*import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../services/api';
 
@@ -68,7 +68,7 @@ const Register = () => {
       style={{ background: 'linear-gradient(160deg, #0a1628 0%, #0f2347 50%, #0a1628 100%)' }}>
 
       <div className="container" style={{ maxWidth: 480 }}>
-        {/* Header */}
+        {/* Header }
         <div className="text-center mb-4">
           <div className="d-inline-flex align-items-center justify-content-center rounded-3 mb-3"
             style={{ width: 64, height: 64, background: 'linear-gradient(135deg, #2563eb, #0ea5e9)', boxShadow: '0 0 30px rgba(37,99,235,0.4)' }}>
@@ -80,7 +80,7 @@ const Register = () => {
           <p className="text-secondary">Register to access international payments</p>
         </div>
 
-        {/* Card */}
+        {/* Card }
         <div className="card border-0 shadow-lg"
           style={{ background: 'rgba(15,35,71,0.85)', border: '1px solid rgba(100,180,255,0.1) !important', backdropFilter: 'blur(10px)', borderRadius: 16 }}>
           <div className="card-body p-4">
@@ -93,7 +93,7 @@ const Register = () => {
             )}
 
             <form onSubmit={handleSubmit} noValidate>
-              {/* Full Name */}
+              {/* Full Name *}
               <div className="mb-3">
                 <label className="form-label text-light fw-medium small">Full Name</label>
                 <div className="input-group">
@@ -109,7 +109,7 @@ const Register = () => {
                 </div>
               </div>
 
-              {/* ID Number */}
+              {/* ID Number *}
               <div className="mb-3">
                 <label className="form-label text-light fw-medium small">ID Number</label>
                 <div className="input-group">
@@ -125,7 +125,7 @@ const Register = () => {
                 </div>
               </div>
 
-              {/* Account Number */}
+              {/* Account Number *}
               <div className="mb-3">
                 <label className="form-label text-light fw-medium small">Account Number</label>
                 <div className="input-group">
@@ -141,7 +141,7 @@ const Register = () => {
                 </div>
               </div>
 
-              {/* Password */}
+              {/* Password *}
               <div className="mb-3">
                 <label className="form-label text-light fw-medium small">Password</label>
                 <div className="input-group">
@@ -162,7 +162,7 @@ const Register = () => {
                 </div>
               </div>
 
-              {/* Confirm Password */}
+              {/* Confirm Password *}
               <div className="mb-4">
                 <label className="form-label text-light fw-medium small">Confirm Password</label>
                 <div className="input-group">
@@ -202,3 +202,4 @@ const Register = () => {
 };
 
 export default Register;
+*/

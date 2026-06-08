@@ -10,7 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import Home        from './pages/Home';
 import Login       from './pages/Login';
-import Register    from './pages/Register';
+/*import Register    from './pages/Register';*/
 import PaymentPage from './pages/PaymentPage';
 import AdminPortal from './pages/AdminPortal';
 
@@ -22,7 +22,7 @@ function App() {
         <Routes>
           <Route path="/"         element={<Home />} />
           <Route path="/login"    element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          {/* <Route path="/register" element={<Register />} /> */}
           <Route path="/payment"  element={
             <ProtectedRoute requiredRole="Customer">
               <PaymentPage />

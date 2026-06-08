@@ -10,6 +10,9 @@ namespace SecurePaymentsPortal.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
+
+        builder.Services.AddScoped<AuditService>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

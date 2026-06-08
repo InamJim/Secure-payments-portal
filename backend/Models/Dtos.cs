@@ -64,4 +64,12 @@ namespace SecurePaymentsPortal.Models
         public DateTime CreatedAt { get; set; }
         public DateTime? VerifiedAt { get; set; }
     }
+    // AuditLog DTOs
+    public class AuditLogResponseDto
+    {
+        public string EventType { get; set; } = string.Empty;
+        public string? AccountNumber { get; set; }
+        public string? Details { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
 }

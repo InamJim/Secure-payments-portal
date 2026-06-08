@@ -59,6 +59,11 @@ builder.Services.Configure<IpRateLimitOptions>(
 builder.Configuration.GetSection("IpRateLimiting"));
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+
+//Audit logging service
+builder.Services.AddScoped<AuditService>();
 
 // CORS 
 builder.Services.AddCors(options =>
@@ -124,5 +129,6 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "Database initialisation failed. Ensure MySQL is running and connection string is correct.");
     }
 }
+
 
 app.Run();

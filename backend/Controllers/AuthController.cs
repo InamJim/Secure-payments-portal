@@ -13,67 +13,28 @@ namespace SecurePaymentsPortal.Controllers
         private readonly ApplicationDbContext _db;
         private readonly IJwtService _jwt;
         private readonly ILogger<AuthController> _logger;
+        private readonly AuditService _audit;
 
         public AuthController(
             ApplicationDbContext db,
             IJwtService jwt,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            AuditService audit)
         {
             _db     = db;
             _jwt    = jwt;
             _logger = logger;
+            _audit  = audit;
         }
 
         // POST /api/auth/register 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+        public IActionResult Register()
         {
-            if (dto == null)
-                return BadRequest(new { message = "Invalid request body." });
-
-            // Whitelist validation
-            if (!InputValidationService.IsValidFullName(dto.FullName))
-                return BadRequest(new { message = "Full name must contain letters and spaces only (2–100 characters)." });
-
-            if (!InputValidationService.IsValidIdNumber(dto.IdNumber))
-                return BadRequest(new { message = "ID number must be exactly 13 digits." });
-
-            if (!InputValidationService.IsValidAccountNumber(dto.AccountNumber))
-                return BadRequest(new { message = "Account number must be 8–12 digits." });
-
-            if (!InputValidationService.IsValidPassword(dto.Password))
-                return BadRequest(new { message = "Password must be 8–128 characters and include uppercase, lowercase, digit, and special character." });
-
-            // Check for duplicate account number 
-            bool accountExists = await _db.Users
-                .AnyAsync(u => u.AccountNumber == dto.AccountNumber.Trim());
-            if (accountExists)
-                return Conflict(new { message = "An account with this account number already exists." });
-
-            // Check for duplicate ID number
-            bool idExists = await _db.Users
-                .AnyAsync(u => u.IdNumber == dto.IdNumber.Trim());
-            if (idExists)
-                return Conflict(new { message = "An account with this ID number already exists." });
-
-            // Hash password with bcrypt
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, workFactor: 12);
-
-            var user = new User
+            return StatusCode(403, new
             {
-                FullName      = dto.FullName.Trim(),
-                IdNumber      = dto.IdNumber.Trim(),
-                AccountNumber = dto.AccountNumber.Trim(),
-                PasswordHash  = passwordHash,
-                Role          = "Customer"
-            };
-
-            _db.Users.Add(user);
-            await _db.SaveChangesAsync();
-
-            _logger.LogInformation("New customer registered: AccountNumber={AccountNumber}", user.AccountNumber);
-
-            return Ok(new { message = "Registration successful. You can now log in." });
+                message = "User registration is disabled. Accounts are preconfigured by the system administrator."
+            });
         }
 
         // POST /api/auth/login
@@ -90,28 +51,63 @@ namespace SecurePaymentsPortal.Controllers
             var user = await _db.Users
                 .FirstOrDefaultAsync(u => u.AccountNumber == dto.AccountNumber.Trim());
 
-            
+            // run lockout check after retrieving user
+            if (user != null && user.LockoutEnd.HasValue && user.LockoutEnd > DateTime.UtcNow)
+            {
+                return Unauthorized(new
+                {
+                    message = "Account locked due to multiple failed login attempts. Try again later."
+                });
+            }
+
             string dummyHash = "$2a$12$invaliddummyhashvaluetopreventienumeeration00000000000";
+
             bool passwordValid = BCrypt.Net.BCrypt.Verify(
                 dto.Password,
                 user?.PasswordHash ?? dummyHash);
 
+            // FAILED LOGIN BLOCK (UPDATED)
             if (user == null || !passwordValid)
             {
+                if (user != null)
+                {
+                    user.FailedLoginAttempts++;
+
+                    // Lock account after 5 failed attempts
+                    if (user.FailedLoginAttempts >= 5)
+                    {
+                        user.LockoutEnd = DateTime.UtcNow.AddMinutes(1);
+                        await _audit.LogAsync("ACCOUNT_LOCKED", user.AccountNumber, "Too many failed login attempts");
+                    }
+
+                    await _db.SaveChangesAsync();
+                }
+
                 _logger.LogWarning("Failed login attempt for AccountNumber={AccountNumber}", dto.AccountNumber);
+
+                await _audit.LogAsync("LOGIN_FAILED", dto.AccountNumber, "Failed login attempt.");
+
                 return Unauthorized(new { message = "Invalid account number or password." });
             }
+
+            // SUCCESS LOGIN → RESET LOCKOUT
+            user.FailedLoginAttempts = 0;
+            user.LockoutEnd = null;
+
+            await _db.SaveChangesAsync();
 
             var token = _jwt.GenerateToken(user);
 
             _logger.LogInformation("User logged in: AccountNumber={AccountNumber}, Role={Role}",
                 user.AccountNumber, user.Role);
 
+            await _audit.LogAsync("LOGIN_SUCCESS", user.AccountNumber, "User logged in successfully.");
+
             return Ok(new AuthResponseDto
             {
-                Token         = token,
-                Role          = user.Role,
-                FullName      = user.FullName,
+                Token = token,
+                Role = user.Role,
+                FullName = user.FullName,
                 AccountNumber = user.AccountNumber
             });
         }

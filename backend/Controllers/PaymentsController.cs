@@ -45,6 +45,9 @@ namespace SecurePaymentsPortal.Controllers
             if (!InputValidationService.IsValidAccountNumber(dto.RecipientAccount))
                 return BadRequest(new { message = "Recipient account number must be 8–12 digits." });
 
+            if (dto.SwiftCode == dto.RecipientAccount)
+                return BadRequest(new { message = "Invalid transfer details." });
+
             // Extract user ID from JWT claims
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!int.TryParse(userIdClaim, out int userId))
@@ -66,6 +69,8 @@ namespace SecurePaymentsPortal.Controllers
             _logger.LogInformation(
                 "Payment created: Id={Id}, UserId={UserId}, Amount={Amount} {Currency}",
                 payment.Id, userId, payment.Amount, payment.Currency);
+
+            await _audit.LogAsync("PAYMENT_CREATED", userId.ToString(), $"Payment created for amount {payment.Amount} {payment.Currency}");
 
             return Ok(new { message = "Payment submitted successfully.", paymentId = payment.Id });
         }

@@ -2,10 +2,9 @@ using System.Text.RegularExpressions;
 
 namespace SecurePaymentsPortal.Services
 {
-    /// <summary>
     /// Centralised whitelist-based input validation.
     /// All regex patterns are anchored to prevent partial matches.
-    /// </summary>
+    
     public static class InputValidationService
     {
         // Letters and spaces only (2–100 chars)
@@ -45,10 +44,8 @@ namespace SecurePaymentsPortal.Services
         public static bool IsValidCurrency(string value)      => CurrencyRegex.IsMatch(value?.Trim() ?? "");
         public static bool IsValidPassword(string value)      => PasswordRegex.IsMatch(value ?? "");
 
-        /// <summary>
         /// Strips dangerous HTML/script characters to prevent XSS when
         /// values are reflected back in responses.
-        /// </summary>
         public static string Sanitize(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return string.Empty;

@@ -34,12 +34,12 @@ const Navbar = () => {
                 <li className="nav-item">
                   <Link className="nav-link text-light opacity-75" to="/login">Sign In</Link>
                 </li>
-                <li className="nav-item">
+                {/* <li className="nav-item">
                   <Link className="btn btn-sm px-3 py-2 fw-semibold" to="/register"
                     style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)', color: 'white', borderRadius: 8 }}>
                     Register
                   </Link>
-                </li>
+                </li> */}
               </>
             ) : (
               <>
