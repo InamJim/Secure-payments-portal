@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'https://localhost:30356/api';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
     baseURL: API_BASE,
@@ -47,6 +47,7 @@ export const paymentService = {
     getAllPayments: () => api.get('/payments/all'),
     getMyPayments: () => api.get('/payments/my'),
     verifyPayment: (id) => api.post(`/payments/verify/${id}`),
+    rejectPayment: (id, data) => api.post(`/payments/reject/${id}`, data),
 };
 
 export default api;

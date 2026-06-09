@@ -11,8 +11,8 @@ namespace SecurePaymentsPortal.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
-
-        builder.Services.AddScoped<AuditService>();
+        public DbSet<FailedLoginEvent> FailedLoginEvents { get; set; }
+        public DbSet<RateLimitEvent> RateLimitEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -26,7 +26,7 @@ namespace SecurePaymentsPortal.Data
                 entity.HasIndex(u => u.AccountNumber).IsUnique();
                 entity.HasIndex(u => u.IdNumber).IsUnique();
                 entity.Property(u => u.Role).HasDefaultValue("Customer");
-                entity.Property(u => u.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(u => u.CreatedAt);
             });
 
             // Payment configuration

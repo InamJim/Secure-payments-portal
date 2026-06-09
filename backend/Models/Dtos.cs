@@ -72,4 +72,10 @@ namespace SecurePaymentsPortal.Models
         public string? Details { get; set; }
         public DateTime Timestamp { get; set; }
     }
+
+    public class RejectPaymentDto
+    {
+        public string? Reason { get; set; }
+    }
+
 }

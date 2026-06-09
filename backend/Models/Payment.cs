@@ -45,5 +45,8 @@ namespace SecurePaymentsPortal.Models
 
         [ForeignKey("UserId")]
         public User? User { get; set; }
+
+        [Column("AdminNote")]
+        public string? AdminNote { get; set; }
     }
 }

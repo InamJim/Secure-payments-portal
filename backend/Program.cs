@@ -6,6 +6,8 @@ using Microsoft.IdentityModel.Tokens;
 using SecurePaymentsPortal.Data;
 using SecurePaymentsPortal.Middleware;
 using SecurePaymentsPortal.Services;
+using System.Security.Claims;
+using SecurePaymentsPortal.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +43,7 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience         = true,
         ValidateLifetime         = true,
         ValidateIssuerSigningKey = true,
+        RoleClaimType            = ClaimTypes.Role,
         ValidIssuer              = jwtIssuer,
         ValidAudience            = jwtAudience,
         IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
@@ -63,8 +66,8 @@ builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
 builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
 
 //Audit logging service
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuditService>();
-
 // CORS 
 builder.Services.AddCors(options =>
 {
@@ -79,6 +82,28 @@ builder.Services.AddCors(options =>
 // Build app 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    if (!db.Users.Any(u => u.Role == "Admin"))
+    {
+        db.Users.Add(new User
+        {
+            FullName = "System Administrator",
+            AccountNumber = "99999999",
+            IdNumber = "0000000000000",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Employ123!"),
+            Role = "Admin",
+            CreatedAt = DateTime.UtcNow,
+            FailedLoginAttempts = 0,
+            LockoutEnd = null
+        });
+
+        db.SaveChanges();
+    }
+}
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -90,16 +115,17 @@ if (!app.Environment.IsDevelopment())
 }
 
 // Enforce HTTPS redirection
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 // Security headers (Clickjacking, XSS, HSTS, CSP)
 app.UseSecurityHeaders();
 
 // HTTPS redirection (MitM protection)
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 // Rate limiting (DDoS protection)
 app.UseIpRateLimiting();
+app.UseMiddleware<RateLimitLoggingMiddleware>();
 
 // CORS
 app.UseCors("ReactApp");

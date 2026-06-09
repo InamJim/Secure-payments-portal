@@ -3,17 +3,20 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
-  const { user } = useAuth();
+    const { user } = useAuth();
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+    if (!user) return <Navigate to="/login" replace />;
 
-  if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to={user.role === 'Admin' ? '/admin' : '/payment'} replace />;
-  }
+    const role = user.role;
+    const allowed = Array.isArray(requiredRole)
+        ? requiredRole
+        : [requiredRole];
 
-  return children;
+    const ok = allowed
+        .map(r => r.toLowerCase())
+        .includes(role);
+
+    return ok ? children : <Navigate to="/" replace />;
 };
 
 export default ProtectedRoute;

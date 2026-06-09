@@ -69,6 +69,7 @@ namespace SecurePaymentsPortal.Controllers
             // FAILED LOGIN BLOCK (UPDATED)
             if (user == null || !passwordValid)
             {
+                var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
                 if (user != null)
                 {
                     user.FailedLoginAttempts++;
@@ -79,6 +80,13 @@ namespace SecurePaymentsPortal.Controllers
                         user.LockoutEnd = DateTime.UtcNow.AddMinutes(1);
                         await _audit.LogAsync("ACCOUNT_LOCKED", user.AccountNumber, "Too many failed login attempts");
                     }
+
+                    _db.FailedLoginEvents.Add(new FailedLoginEvent
+                    {
+                        AccountNumber = dto.AccountNumber,
+                        Reason = user == null ? "UserNotFound" : "InvalidPassword",
+                        IpAddress = ip ?? "unknown"
+                    });
 
                     await _db.SaveChangesAsync();
                 }

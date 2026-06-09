@@ -1,8 +1,5 @@
 version: 2.1
 
-orbs:
-  sonarcloud: sonarsource/sonarcloud@2.0
-
 jobs:
   build-backend:
     docker:
@@ -14,15 +11,38 @@ jobs:
 
       - run:
           name: Restore dependencies
-          command: dotnet restore
+          command: dotnet restore SecurePaymentsPortal.csproj
 
       - run:
-          name: Build solution
-          command: dotnet build --configuration Release --no-restore
+          name: Build backend
+          command: dotnet build SecurePaymentsPortal.csproj --configuration Release --no-restore
 
       - run:
-          name: Run tests (if available)
-          command: dotnet test --no-build || true
+          name: Run unit tests
+          command: dotnet test SecurePaymentsPortal.csproj --no-build || true
+
+
+  dependency-scan:
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:8.0
+    working_directory: ~/project/backend
+    steps:
+      - checkout:
+          path: ~/project
+
+      - run:
+          name: Software Composition Analysis (SCA)
+          command: |
+            echo "Checking vulnerable packages..."
+            dotnet list SecurePaymentsPortal.csproj package --vulnerable > vulnerabilities-report.txt || true
+
+      - run:
+          name: Show SCA results
+          command: cat vulnerabilities-report.txt
+
+      - store_artifacts:
+          path: vulnerabilities-report.txt
+
 
   sonar-scan:
     docker:
@@ -32,13 +52,14 @@ jobs:
       - checkout
 
       - run:
-          name: SonarQube Scan
+          name: SonarQube Static Analysis
           command: |
             sonar-scanner \
               -Dsonar.projectKey=SecurePaymentsPortal \
               -Dsonar.sources=backend \
               -Dsonar.host.url=$SONAR_HOST_URL \
               -Dsonar.login=$SONAR_TOKEN
+
 
   build-frontend:
     docker:
@@ -56,10 +77,14 @@ jobs:
           name: Build React app
           command: npm run build
 
+
 workflows:
   security-pipeline:
     jobs:
       - build-backend
+      - dependency-scan:
+          requires:
+            - build-backend
       - sonar-scan:
           requires:
             - build-backend

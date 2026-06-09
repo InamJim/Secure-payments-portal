@@ -15,13 +15,16 @@ namespace SecurePaymentsPortal.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly ILogger<PaymentsController> _logger;
+        private readonly AuditService _audit;
 
         public PaymentsController(
             ApplicationDbContext db,
-            ILogger<PaymentsController> logger)
+            ILogger<PaymentsController> logger,
+            AuditService audit)
         {
-            _db     = db;
+            _db = db;
             _logger = logger;
+            _audit = audit;
         }
 
         // POST /api/payments/pay (Customer only)
@@ -55,12 +58,12 @@ namespace SecurePaymentsPortal.Controllers
 
             var payment = new Payment
             {
-                UserId    = userId,
-                Amount    = dto.Amount,
-                Currency  = dto.Currency.Trim().ToUpperInvariant(),
+                UserId = userId,
+                Amount = dto.Amount,
+                Currency = dto.Currency.Trim().ToUpperInvariant(),
                 SwiftCode = dto.SwiftCode.Trim().ToUpperInvariant(),
-                RecipientAccount  = dto.RecipientAccount.Trim(),
-                Status    = "PENDING"
+                RecipientAccount = dto.RecipientAccount.Trim(),
+                Status = "PENDING"
             };
 
             _db.Payments.Add(payment);
@@ -85,16 +88,16 @@ namespace SecurePaymentsPortal.Controllers
                 .OrderByDescending(p => p.CreatedAt)
                 .Select(p => new PaymentResponseDto
                 {
-                    Id            = p.Id,
-                    CustomerName  = p.User != null ? p.User.FullName : "Unknown",
+                    Id = p.Id,
+                    CustomerName = p.User != null ? p.User.FullName : "Unknown",
                     AccountNumber = p.User != null ? p.User.AccountNumber : "Unknown",
-                    Amount        = p.Amount,
-                    Currency      = p.Currency,
-                    SwiftCode     = p.SwiftCode,
+                    Amount = p.Amount,
+                    Currency = p.Currency,
+                    SwiftCode = p.SwiftCode,
                     RecipientAccount = p.RecipientAccount,
-                    Status        = p.Status,
-                    CreatedAt     = p.CreatedAt,
-                    VerifiedAt    = p.VerifiedAt
+                    Status = p.Status,
+                    CreatedAt = p.CreatedAt,
+                    VerifiedAt = p.VerifiedAt
                 })
                 .ToListAsync();
 
@@ -109,22 +112,76 @@ namespace SecurePaymentsPortal.Controllers
             var payment = await _db.Payments.FindAsync(id);
 
             if (payment == null)
+            {
+                await _audit.LogAsync(
+                    "PAYMENT_VERIFY_FAILED",
+                    User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+                    $"Attempted to verify non-existent payment ID {id}"
+                );
+
+                return NotFound(new { message = "Payment not found." });
+            }
+
+            if (payment.Status != "PENDING")
+            {
+                await _audit.LogAsync(
+                    "PAYMENT_VERIFY_BLOCKED",
+                    User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+                    $"Attempted re-verification of payment ID {id} (Status: {payment.Status})"
+                );
+
+                return BadRequest(new { message = $"Payment is already {payment.Status}." });
+            }
+
+            payment.Status = "VERIFIED";
+            payment.VerifiedAt = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync();
+
+            await _audit.LogAsync(
+                "PAYMENT_VERIFIED",
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+                $"Payment ID {id} verified successfully"
+            );
+
+            var adminIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            _logger.LogInformation(
+                "Payment verified: Id={Id}, AdminId={AdminId}",
+                id, adminIdClaim
+            );
+
+            return Ok(new { message = "Payment verified and submitted to SWIFT.", paymentId = id });
+        }
+
+        [HttpPost("reject/{id:int}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RejectPayment(int id, [FromBody] RejectPaymentDto dto)
+        {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Reason))
+                return BadRequest(new { message = "Reason is required." });
+
+            var payment = await _db.Payments.FindAsync(id);
+
+            if (payment == null)
                 return NotFound(new { message = "Payment not found." });
 
             if (payment.Status != "PENDING")
                 return BadRequest(new { message = $"Payment is already {payment.Status}." });
 
-            payment.Status     = "VERIFIED";
+            payment.Status = "REJECTED";
             payment.VerifiedAt = DateTime.UtcNow;
+            payment.AdminNote = dto.Reason;
 
             await _db.SaveChangesAsync();
 
-            var adminIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            _logger.LogInformation(
-                "Payment verified: Id={Id}, AdminId={AdminId}",
-                id, adminIdClaim);
+            await _audit.LogAsync(
+                "PAYMENT_REJECTED",
+                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
+                $"Payment ID {id} rejected. Reason: {dto.Reason}"
+            );
 
-            return Ok(new { message = "Payment verified and submitted to SWIFT.", paymentId = id });
+            return Ok(new { message = "Payment rejected.", paymentId = id });
         }
 
         // GET /api/payments/my  (Customer – own payments)
@@ -141,16 +198,16 @@ namespace SecurePaymentsPortal.Controllers
                 .OrderByDescending(p => p.CreatedAt)
                 .Select(p => new PaymentResponseDto
                 {
-                    Id            = p.Id,
-                    CustomerName  = p.User != null ? p.User.FullName : "",
+                    Id = p.Id,
+                    CustomerName = p.User != null ? p.User.FullName : "",
                     AccountNumber = p.User != null ? p.User.AccountNumber : "",
-                    Amount        = p.Amount,
-                    Currency      = p.Currency,
-                    SwiftCode     = p.SwiftCode,
+                    Amount = p.Amount,
+                    Currency = p.Currency,
+                    SwiftCode = p.SwiftCode,
                     RecipientAccount = p.RecipientAccount,
-                    Status        = p.Status,
-                    CreatedAt     = p.CreatedAt,
-                    VerifiedAt    = p.VerifiedAt
+                    Status = p.Status,
+                    CreatedAt = p.CreatedAt,
+                    VerifiedAt = p.VerifiedAt
                 })
                 .ToListAsync();
 

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SecurePaymentsPortal.Data;
 using SecurePaymentsPortal.Models;
-using SecurePaymentsPortal.Dtos;
 
 namespace SecurePaymentsPortal.Controllers
 {
@@ -19,7 +18,6 @@ namespace SecurePaymentsPortal.Controllers
             _db = db;
         }
 
-        // GET: /api/admin/security/audit-logs
         [HttpGet("audit-logs")]
         public async Task<IActionResult> GetAuditLogs ()
         {
@@ -36,6 +34,46 @@ namespace SecurePaymentsPortal.Controllers
                 .ToListAsync();
 
             return Ok(logs);
+        }
+
+        [HttpGet("failed-logins")]
+        public async Task<IActionResult> GetFailedLogins ()
+        {
+            var failedLogins = await _db.AuditLogs
+                .Where(x => x.EventType == "LOGIN_FAILED")
+                .OrderByDescending(x => x.Timestamp)
+                .Take(100)
+                .Select(x => new AuditLogResponseDto
+                {
+                    EventType = x.EventType,
+                    AccountNumber = x.AccountNumber,
+                    Details = x.Details,
+                    Timestamp = x.Timestamp
+                })
+                .ToListAsync();
+
+            return Ok(failedLogins);
+        }
+
+        [HttpGet("rate-limit-events")]
+        public async Task<IActionResult> GetRateLimitEvents ()
+        {
+            var rateLimitEvents = await _db.AuditLogs
+                .Where(x =>
+                    x.EventType == "RATE_LIMIT_TRIGGERED" ||
+                    x.EventType == "BRUTE_FORCE_BLOCKED")
+                .OrderByDescending(x => x.Timestamp)
+                .Take(100)
+                .Select(x => new AuditLogResponseDto
+                {
+                    EventType = x.EventType,
+                    AccountNumber = x.AccountNumber,
+                    Details = x.Details,
+                    Timestamp = x.Timestamp
+                })
+                .ToListAsync();
+
+            return Ok(rateLimitEvents);
         }
     }
 }

@@ -38,7 +38,7 @@ secure-payments-portal/
 │       │   ├── Login.js
 │       │   ├── Register.js
 │       │   ├── PaymentPage.js
-│       │   └── AdminPortal.js
+│       │   └── AdminDashboard.js
 │       ├── services/
 │       │   ├── api.js           # Axios wrapper with JWT interceptors
 │       │   └── AuthContext.js   # Global auth state

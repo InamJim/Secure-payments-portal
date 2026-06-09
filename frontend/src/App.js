@@ -8,36 +8,47 @@ import { AuthProvider } from './services/AuthContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 
-import Home        from './pages/Home';
-import Login       from './pages/Login';
+import Home from './pages/Home';
+import Login from './pages/Login';
 /*import Register    from './pages/Register';*/
 import PaymentPage from './pages/PaymentPage';
-import AdminPortal from './pages/AdminPortal';
+import AdminDashboard
+    from './pages/AdminDashboard';
+import SecurityMonitor from './pages/SecurityMonitor';
 
 function App() {
-  return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Navbar />
-        <Routes>
-          <Route path="/"         element={<Home />} />
-          <Route path="/login"    element={<Login />} />
-          {/* <Route path="/register" element={<Register />} /> */}
-          <Route path="/payment"  element={
-            <ProtectedRoute requiredRole="Customer">
-              <PaymentPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin"    element={
-            <ProtectedRoute requiredRole="Admin">
-              <AdminPortal />
-            </ProtectedRoute>
-          } />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
-  );
+    return (
+        <AuthProvider>
+            <BrowserRouter>
+                <Navbar />
+                <Routes>
+                    <Route path="/" element={<Home />} />
+
+                    <Route path="/login" element={<Login />} />
+                    {/* <Route path="/register" element={<Register />} /> */}
+
+                    <Route path="/payment" element={
+                        <ProtectedRoute requiredRole={["customer", "admin"]}>
+                            <PaymentPage />
+                        </ProtectedRoute>
+                    } />
+
+                    <Route path="/security-monitor" element={
+                        <ProtectedRoute requiredRole="admin">
+                            <SecurityMonitor />
+                        </ProtectedRoute>
+                    } />
+
+                    <Route path="/admin" element={
+                        <ProtectedRoute requiredRole={["admin"]}>
+                            <AdminDashboard />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </BrowserRouter>
+        </AuthProvider>
+    );
 }
 
 export default App;

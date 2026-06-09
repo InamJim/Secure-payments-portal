@@ -34,12 +34,8 @@ const Home = () => {
           <div className="d-flex gap-3 justify-content-center flex-wrap">
             {!user ? (
               <>
-                <Link to="/register" className="btn btn-lg fw-semibold px-5 py-3"
-                  style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)', color: 'white', borderRadius: 12, boxShadow: '0 8px 30px rgba(37,99,235,0.4)' }}>
-                  <i className="bi bi-person-plus me-2"></i>Open Account
-                </Link>
                 <Link to="/login" className="btn btn-lg fw-semibold px-5 py-3"
-                  style={{ background: 'rgba(255,255,255,0.05)', color: 'white', borderRadius: 12, border: '1px solid rgba(255,255,255,0.15)' }}>
+                  style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)', color: 'white', borderRadius: 12, boxShadow: '0 8px 30px rgba(37,99,235,0.4)' }}>
                   <i className="bi bi-box-arrow-in-right me-2"></i>Sign In
                 </Link>
               </>
